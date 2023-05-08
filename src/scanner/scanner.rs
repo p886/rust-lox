@@ -10,6 +10,9 @@ pub struct Scanner {
 impl Scanner {
     pub fn scan_tokens(&mut self) {
         for character in self.source.chars() {
+            if character.is_whitespace() {
+                continue;
+            }
             match scan_token(character) {
                 Ok(scanned_token) => self.tokens.push(scanned_token),
                 Err(err) => {
