@@ -33,7 +33,7 @@ impl Scanner {
                     Some(peeked_char) => match peeked_char {
                         '/' => {
                             // comments
-                            while let Some(next_char) = chars.next() {
+                            for next_char in chars.by_ref() {
                                 // consume all characters after the comment until the newline
                                 if next_char == '\n' {
                                     break;
@@ -70,14 +70,12 @@ fn double_lexeme(
     double_type: TokenType,
 ) -> Result<TokenType, String> {
     match chars.peek() {
-        Some(next_char) => match next_char {
-            '=' => {
-                chars.next();
-                Ok(double_type)
-            }
-            _ => Ok(single_type),
-        },
+        Some('=') => {
+            chars.next();
+            Ok(double_type)
+        }
         None => Ok(single_type),
+        _ => Ok(single_type),
     }
 }
 
