@@ -1,4 +1,3 @@
-use crate::scanner::token;
 use crate::scanner::token::Token;
 use crate::scanner::token_type::TokenType;
 
@@ -26,44 +25,21 @@ impl Scanner {
                 '+' => Ok(TokenType::Plus),
                 ';' => Ok(TokenType::Semicolon),
                 '*' => Ok(TokenType::Star),
-                '!' => match chars.peek() {
-                    Some(next_char) => match next_char {
-                        '=' => {
-                            chars.next();
-                            Ok(TokenType::BangEqual)
-                        }
-                        _ => Ok(TokenType::Bang),
-                    },
+                '!' => match double_lexeme(&mut chars, TokenType::Bang, TokenType::BangEqual) {
+                    Some(value) => value,
                     None => break,
                 },
-                '=' => match chars.peek() {
-                    Some(next_char) => match next_char {
-                        '=' => {
-                            chars.next();
-                            Ok(TokenType::EqualEqual)
-                        }
-                        _ => Ok(TokenType::Equal),
-                    },
+                '=' => match double_lexeme(&mut chars, TokenType::Equal, TokenType::EqualEqual) {
+                    Some(value) => value,
                     None => break,
                 },
-                '<' => match chars.peek() {
-                    Some(next_char) => match next_char {
-                        '=' => {
-                            chars.next();
-                            Ok(TokenType::LessEqual)
-                        }
-                        _ => Ok(TokenType::Less),
-                    },
+                '<' => match double_lexeme(&mut chars, TokenType::Less, TokenType::LessEqual) {
+                    Some(value) => value,
                     None => break,
                 },
-                '>' => match chars.peek() {
-                    Some(next_char) => match next_char {
-                        '=' => {
-                            chars.next();
-                            Ok(TokenType::GreaterEqual)
-                        }
-                        _ => Ok(TokenType::Greater),
-                    },
+                '>' => match double_lexeme(&mut chars, TokenType::Greater, TokenType::GreaterEqual)
+                {
+                    Some(value) => value,
                     None => break,
                 },
                 _ => Err(format!("unrecognized character {:?}", char)),
@@ -76,10 +52,25 @@ impl Scanner {
                     literal: None,
                     line: 1,
                 }),
-                Err(msg) => {
-                    println!("{}", msg);
-                }
+                Err(msg) => println!("{}", msg),
             }
         }
+    }
+}
+
+fn double_lexeme(
+    chars: &mut std::iter::Peekable<std::str::Chars>,
+    single_type: TokenType,
+    double_type: TokenType,
+) -> Option<Result<TokenType, String>> {
+    match chars.peek() {
+        Some(next_char) => match next_char {
+            '=' => {
+                chars.next();
+                Some(Ok(double_type))
+            }
+            _ => Some(Ok(single_type)),
+        },
+        None => None,
     }
 }

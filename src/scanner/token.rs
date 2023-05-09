@@ -11,12 +11,3 @@ pub struct Token {
     // the line where the token is found
     pub line: i32,
 }
-
-pub fn new(token_type: TokenType, lexeme: String, literal: Option<String>, line: i32) -> Token {
-    Token {
-        token_type,
-        lexeme,
-        literal,
-        line,
-    }
-}
