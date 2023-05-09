@@ -81,8 +81,9 @@ mod tests {
 
     #[test]
     fn test_scan_tokens_all_success() {
-        let tokens = match scan_tokens(String::from("   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   "))
-        {
+        let tokens = match scan_tokens(String::from(
+            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;",
+        )) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
@@ -112,6 +113,9 @@ mod tests {
             make_test_token(TokenType::LeftBrace),
             make_test_token(TokenType::LeftParen),
             make_test_token(TokenType::RightParen),
+            make_test_token(TokenType::Slash),
+            make_test_token(TokenType::Comment),
+            make_test_token(TokenType::Semicolon),
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
