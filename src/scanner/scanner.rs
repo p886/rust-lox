@@ -42,6 +42,25 @@ impl Scanner {
                     Some(value) => value,
                     None => break,
                 },
+                '/' => match chars.peek() {
+                    Some(peeked_char) => match peeked_char {
+                        '/' => {
+                            // comments
+                            while let Some(next_char) = chars.next() {
+                                // consume all characters after the comment until the newline
+                                if next_char == '\n' {
+                                    break;
+                                }
+                            }
+                            Ok(TokenType::Comment)
+                        }
+                        _ => {
+                            chars.next();
+                            Ok(TokenType::Slash)
+                        }
+                    },
+                    None => break,
+                },
                 _ => Err(format!("unrecognized character {:?}", char)),
             };
 

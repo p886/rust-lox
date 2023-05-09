@@ -10,7 +10,7 @@ pub enum TokenType {
     Minus,
     Plus,
     Semicolon,
-    // Slash,
+    Slash,
     Star,
     // One or two character tokens.
     Bang,
@@ -21,6 +21,7 @@ pub enum TokenType {
     GreaterEqual,
     Less,
     LessEqual,
+    Comment,
     // Literals
     // Identifier,
     // String,
