@@ -9,35 +9,77 @@ pub struct Scanner {
 
 impl Scanner {
     pub fn scan_tokens(&mut self) {
-        for character in self.source.chars() {
-            if character.is_whitespace() {
+        let mut chars = self.source.chars().peekable();
+
+        while let Some(char) = chars.next() {
+            if char.is_whitespace() {
                 continue;
             }
-            match scan_token(character) {
-                Ok(scanned_token) => self.tokens.push(scanned_token),
-                Err(err) => {
-                    println!("Error scanning: {}", err);
-                    // don't `break` here, keep scanning instead to report as many errors as possible
+            let token_result: Result<TokenType, String> = match char {
+                '(' => Ok(TokenType::LeftParen),
+                ')' => Ok(TokenType::RightParen),
+                '{' => Ok(TokenType::LeftBrace),
+                '}' => Ok(TokenType::RightBrace),
+                ',' => Ok(TokenType::Comma),
+                '.' => Ok(TokenType::Dot),
+                '-' => Ok(TokenType::Minus),
+                '+' => Ok(TokenType::Plus),
+                ';' => Ok(TokenType::Semicolon),
+                '*' => Ok(TokenType::Star),
+                '!' => match chars.peek() {
+                    Some(next_char) => match next_char {
+                        '=' => {
+                            chars.next();
+                            Ok(TokenType::BangEqual)
+                        }
+                        _ => Ok(TokenType::Bang),
+                    },
+                    None => break,
+                },
+                '=' => match chars.peek() {
+                    Some(next_char) => match next_char {
+                        '=' => {
+                            chars.next();
+                            Ok(TokenType::EqualEqual)
+                        }
+                        _ => Ok(TokenType::Equal),
+                    },
+                    None => break,
+                },
+                '<' => match chars.peek() {
+                    Some(next_char) => match next_char {
+                        '=' => {
+                            chars.next();
+                            Ok(TokenType::LessEqual)
+                        }
+                        _ => Ok(TokenType::Less),
+                    },
+                    None => break,
+                },
+                '>' => match chars.peek() {
+                    Some(next_char) => match next_char {
+                        '=' => {
+                            chars.next();
+                            Ok(TokenType::GreaterEqual)
+                        }
+                        _ => Ok(TokenType::Greater),
+                    },
+                    None => break,
+                },
+                _ => Err(format!("unrecognized character {:?}", char)),
+            };
+
+            match token_result {
+                Ok(tt) => self.tokens.push(Token {
+                    token_type: tt,
+                    lexeme: String::from("todo"),
+                    literal: None,
+                    line: 1,
+                }),
+                Err(msg) => {
+                    println!("{}", msg);
                 }
             }
         }
     }
-}
-
-fn scan_token(character: char) -> Result<Token, String> {
-    let tok: Token = match character {
-        '(' => token::new(TokenType::LeftParen, String::from(character), None, 1),
-        ')' => token::new(TokenType::RightParen, String::from(character), None, 1),
-        '{' => token::new(TokenType::LeftBrace, String::from(character), None, 1),
-        '}' => token::new(TokenType::RightBrace, String::from(character), None, 1),
-        ',' => token::new(TokenType::Comma, String::from(character), None, 1),
-        '.' => token::new(TokenType::Dot, String::from(character), None, 1),
-        '-' => token::new(TokenType::Minus, String::from(character), None, 1),
-        '+' => token::new(TokenType::Plus, String::from(character), None, 1),
-        ';' => token::new(TokenType::Semicolon, String::from(character), None, 1),
-        '*' => token::new(TokenType::Star, String::from(character), None, 1),
-        _ => return Err(format!("Unexpected character {:?}", character)),
-    };
-
-    Ok(tok)
 }
