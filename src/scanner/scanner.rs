@@ -49,7 +49,6 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
         match token_result {
             Ok(tt) => tokens.push(Token {
                 token_type: tt,
-                lexeme: String::from("todo"),
                 literal: None,
                 line: 1,
             }),
@@ -91,7 +90,6 @@ mod tests {
         fn make_test_token(tt: TokenType) -> Token {
             Token {
                 token_type: tt,
-                lexeme: String::from("todo"),
                 literal: None,
                 line: 1,
             }
@@ -133,5 +131,32 @@ mod tests {
                 assert_eq!("unrecognized character '?'", err)
             }
         };
+    }
+
+    #[test]
+    fn test_scan_tokens_comments() {
+        let tokens = match scan_tokens(String::from("// a comment \n+")) {
+            Ok(tokens) => tokens,
+            Err(err) => panic!("Unexpected error in test: {}", err),
+        };
+
+        fn make_test_token(tt: TokenType) -> Token {
+            Token {
+                token_type: tt,
+                literal: None,
+                line: 1,
+            }
+        }
+
+        let expected_tokens = vec![
+            make_test_token(TokenType::Comment),
+            make_test_token(TokenType::Plus),
+        ];
+
+        assert_eq!(tokens.len(), expected_tokens.len());
+
+        for (i, _) in tokens.iter().enumerate() {
+            assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+        }
     }
 }
