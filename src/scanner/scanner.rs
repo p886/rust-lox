@@ -85,7 +85,7 @@ mod tests {
         let tokens = match scan_tokens(String::from("   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   "))
         {
             Ok(tokens) => tokens,
-            Err(err) => panic!("{}", err),
+            Err(err) => panic!("Unexpected error in test: {}", err),
         };
 
         fn make_test_token(tt: TokenType) -> Token {
@@ -121,5 +121,17 @@ mod tests {
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
         }
+    }
+
+    #[test]
+    fn test_scan_tokens_unexpected_character() {
+        match scan_tokens(String::from("?")) {
+            Ok(tokens) => {
+                assert!(tokens.len() == 0)
+            }
+            Err(err) => {
+                assert_eq!("unrecognized character '?'", err)
+            }
+        };
     }
 }
