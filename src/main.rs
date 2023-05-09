@@ -1,3 +1,4 @@
+use crate::scanner::scanner::scan_tokens;
 use std::env;
 use std::fs;
 use std::io;
@@ -62,10 +63,14 @@ fn run_prompt() {
 
 fn run(source: String) {
     println!("{}", source);
-    let tokens = Vec::new();
-    let mut scnr = scanner::scanner::Scanner { source, tokens };
-    scnr.scan_tokens();
-    for tok in scnr.tokens.iter() {
+    let tokens = match scan_tokens(source) {
+        Ok(tokens) => tokens,
+        Err(err) => {
+            println!("Error scanning: {}", err);
+            return;
+        }
+    };
+    for tok in tokens.iter() {
         println!("token: {:?}", tok);
     }
 }
