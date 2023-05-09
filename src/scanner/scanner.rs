@@ -129,7 +129,7 @@ mod tests {
     fn test_scan_tokens_unexpected_character() {
         match scan_tokens(String::from("?")) {
             Ok(tokens) => {
-                assert!(tokens.len() == 0)
+                assert!(tokens.is_empty())
             }
             Err(err) => {
                 assert_eq!("unrecognized character '?'", err)
