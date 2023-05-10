@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_scan_tokens_all_success() {
         let tokens = match scan_tokens(String::from(
-            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;\"foo\"",
+            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;\"fo\no\"",
         )) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -143,7 +143,7 @@ mod tests {
             make_test_token(TokenType::Semicolon),
             Token {
                 token_type: TokenType::String,
-                literal: Some(String::from("foo")),
+                literal: Some(String::from("fo\no")),
             },
         ];
 
@@ -219,5 +219,24 @@ mod tests {
                 assert_eq!(err, "Unterminated string")
             }
         };
+    }
+
+    #[test]
+    fn test_scan_tokens_multiline_string_literals() {
+        let tokens = match scan_tokens(String::from("\"hello\nworld\"")) {
+            Ok(tokens) => tokens,
+            Err(err) => panic!("Unexpected error in test: {}", err),
+        };
+
+        let expected_tokens = vec![Token {
+            token_type: TokenType::String,
+            literal: Some(String::from("hello\nworld")),
+        }];
+
+        assert_eq!(tokens.len(), expected_tokens.len());
+
+        for (i, _) in tokens.iter().enumerate() {
+            assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+        }
     }
 }
