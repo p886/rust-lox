@@ -9,17 +9,17 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
         if char.is_whitespace() {
             continue;
         }
-        let token_result: Result<TokenType, String> = match char {
-            '(' => Ok(TokenType::LeftParen),
-            ')' => Ok(TokenType::RightParen),
-            '{' => Ok(TokenType::LeftBrace),
-            '}' => Ok(TokenType::RightBrace),
-            ',' => Ok(TokenType::Comma),
-            '.' => Ok(TokenType::Dot),
-            '-' => Ok(TokenType::Minus),
-            '+' => Ok(TokenType::Plus),
-            ';' => Ok(TokenType::Semicolon),
-            '*' => Ok(TokenType::Star),
+        let token_result: Result<Token, String> = match char {
+            '(' => make_simple_token(TokenType::LeftParen),
+            ')' => make_simple_token(TokenType::RightParen),
+            '{' => make_simple_token(TokenType::LeftBrace),
+            '}' => make_simple_token(TokenType::RightBrace),
+            ',' => make_simple_token(TokenType::Comma),
+            '.' => make_simple_token(TokenType::Dot),
+            '-' => make_simple_token(TokenType::Minus),
+            '+' => make_simple_token(TokenType::Plus),
+            ';' => make_simple_token(TokenType::Semicolon),
+            '*' => make_simple_token(TokenType::Star),
             '!' => double_lexeme(&mut chars, TokenType::Bang, TokenType::BangEqual),
             '=' => double_lexeme(&mut chars, TokenType::Equal, TokenType::EqualEqual),
             '<' => double_lexeme(&mut chars, TokenType::Less, TokenType::LessEqual),
@@ -34,24 +34,39 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                                 break;
                             }
                         }
-                        Ok(TokenType::Comment)
+                        make_simple_token(TokenType::Comment)
                     }
                     _ => {
                         chars.next();
-                        Ok(TokenType::Slash)
+                        make_simple_token(TokenType::Slash)
                     }
                 },
-                None => Ok(TokenType::Slash),
+                None => make_simple_token(TokenType::Slash),
             },
+            '"' => {
+                let mut elements: Vec<String> = Vec::new();
+                let mut terminated = false;
+                for next_char in chars.by_ref() {
+                    if next_char == '"' {
+                        terminated = true;
+                        break;
+                    }
+                    elements.push(next_char.to_string());
+                }
+                if !terminated {
+                    return Err(String::from("Unterminated string"));
+                }
+                let joined = elements.join("");
+                Ok(Token {
+                    token_type: TokenType::String,
+                    literal: Some(joined),
+                })
+            }
             _ => Err(format!("unrecognized character {:?}", char)),
         };
 
         match token_result {
-            Ok(tt) => tokens.push(Token {
-                token_type: tt,
-                literal: None,
-                line: 1,
-            }),
+            Ok(t) => tokens.push(t),
             Err(msg) => return Err(msg),
         }
     }
@@ -62,15 +77,26 @@ fn double_lexeme(
     chars: &mut std::iter::Peekable<std::str::Chars>,
     single_type: TokenType,
     double_type: TokenType,
-) -> Result<TokenType, String> {
-    match chars.peek() {
+) -> Result<Token, String> {
+    let tt = match chars.peek() {
         Some('=') => {
             chars.next();
-            Ok(double_type)
+            double_type
         }
-        None => Ok(single_type),
-        _ => Ok(single_type),
-    }
+        None => single_type,
+        _ => single_type,
+    };
+    Ok(Token {
+        token_type: tt,
+        literal: None,
+    })
+}
+
+fn make_simple_token(tt: TokenType) -> Result<Token, String> {
+    Ok(Token {
+        token_type: tt,
+        literal: None,
+    })
 }
 
 #[cfg(test)]
@@ -82,7 +108,7 @@ mod tests {
     #[test]
     fn test_scan_tokens_all_success() {
         let tokens = match scan_tokens(String::from(
-            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;",
+            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;\"foo\"",
         )) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -92,7 +118,6 @@ mod tests {
             Token {
                 token_type: tt,
                 literal: None,
-                line: 1,
             }
         }
 
@@ -116,6 +141,10 @@ mod tests {
             make_test_token(TokenType::Slash),
             make_test_token(TokenType::Comment),
             make_test_token(TokenType::Semicolon),
+            Token {
+                token_type: TokenType::String,
+                literal: Some(String::from("foo")),
+            },
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
@@ -148,7 +177,6 @@ mod tests {
             Token {
                 token_type: tt,
                 literal: None,
-                line: 1,
             }
         }
 
@@ -162,5 +190,34 @@ mod tests {
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
         }
+    }
+
+    #[test]
+    fn test_scan_tokens_string_literals() {
+        let tokens = match scan_tokens(String::from("\"helloworld\"")) {
+            Ok(tokens) => tokens,
+            Err(err) => panic!("Unexpected error in test: {}", err),
+        };
+
+        let expected_tokens = vec![Token {
+            token_type: TokenType::String,
+            literal: Some(String::from("helloworld")),
+        }];
+
+        assert_eq!(tokens.len(), expected_tokens.len());
+
+        for (i, _) in tokens.iter().enumerate() {
+            assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+        }
+    }
+
+    #[test]
+    fn test_scan_tokens_unterminated_string() {
+        match scan_tokens(String::from("\"helloworld")) {
+            Ok(tokens) => assert!(tokens.is_empty()),
+            Err(err) => {
+                assert_eq!(err, "Unterminated string")
+            }
+        };
     }
 }

@@ -24,7 +24,7 @@ pub enum TokenType {
     Comment,
     // Literals
     // Identifier,
-    // String,
+    String,
     // Number,
     // //Keywords
     // And,

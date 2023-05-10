@@ -7,5 +7,5 @@ pub struct Token {
     // the value containted in the token if it has one (i.e. String or Number literals)
     pub literal: Option<String>,
     // the line where the token is found
-    pub line: i32,
+    // pub line: i32,
 }
