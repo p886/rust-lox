@@ -1,3 +1,4 @@
+use crate::scanner::token::Literal;
 use crate::scanner::token::Token;
 use crate::scanner::token_type::TokenType;
 
@@ -59,7 +60,44 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                 let joined = elements.join("");
                 Ok(Token {
                     token_type: TokenType::String,
-                    literal: Some(joined),
+                    literal: Some(Literal::String(joined)),
+                })
+            }
+            '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+                let mut elements: Vec<String> = Vec::new();
+                let mut contains_dot = false;
+
+                // add the first, matched character to the vector
+                elements.push(char.to_string());
+
+                // keep adding the rest of the numbers or (single) decimal dot until we run out
+                for next_char in chars.by_ref() {
+                    if next_char == '.' && contains_dot {
+                        break;
+                    }
+
+                    if next_char == '.' {
+                        contains_dot = true;
+                    }
+
+                    if next_char != '.' && !(next_char.is_numeric()) {
+                        break;
+                    }
+                    elements.push(next_char.to_string());
+                }
+                let joined = elements.join("");
+                let number = match joined.parse::<f64>() {
+                    Ok(num) => num,
+                    Err(err) => {
+                        return Err(format!(
+                            "Error parsing number: {}, trying to parse: {:?}",
+                            err, joined
+                        ))
+                    }
+                };
+                Ok(Token {
+                    token_type: TokenType::Number,
+                    literal: Some(Literal::Numeric(number)),
                 })
             }
             _ => Err(format!("unrecognized character {:?}", char)),
@@ -115,7 +153,7 @@ mod tests {
     #[test]
     fn test_scan_tokens_all_success() {
         let tokens = match scan_tokens(String::from(
-            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;\"fo\no\"",
+            "   !,.- + != <= >=\n\n\n\n ==\t !\r<>}{()   / //\n;\"fo\no\" 1 6.78",
         )) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -143,7 +181,15 @@ mod tests {
             make_test_token(TokenType::Semicolon),
             Token {
                 token_type: TokenType::String,
-                literal: Some(String::from("fo\no")),
+                literal: Some(Literal::String(String::from("fo\no"))),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(1.0)),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(6.78)),
             },
         ];
 
@@ -186,7 +232,7 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_tokens_string_literals() {
+    fn test_scan_tokens_literals() {
         let tokens = match scan_tokens(String::from("\"helloworld\"")) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -194,7 +240,7 @@ mod tests {
 
         let expected_tokens = vec![Token {
             token_type: TokenType::String,
-            literal: Some(String::from("helloworld")),
+            literal: Some(Literal::String(String::from("helloworld"))),
         }];
 
         assert_eq!(tokens.len(), expected_tokens.len());
@@ -215,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_tokens_multiline_string_literals() {
+    fn test_scan_tokens_multiline_literals() {
         let tokens = match scan_tokens(String::from("\"hello\nworld\"")) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -223,8 +269,45 @@ mod tests {
 
         let expected_tokens = vec![Token {
             token_type: TokenType::String,
-            literal: Some(String::from("hello\nworld")),
+            literal: Some(Literal::String(String::from("hello\nworld"))),
         }];
+
+        assert_eq!(tokens.len(), expected_tokens.len());
+
+        for (i, _) in tokens.iter().enumerate() {
+            assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+        }
+    }
+
+    #[test]
+    fn test_scan_tokens_number_literals() {
+        let tokens = match scan_tokens(String::from("1.0 23.123 1 542 2348923409")) {
+            Ok(tokens) => tokens,
+            Err(err) => panic!("Unexpected error in test: {}", err),
+        };
+
+        let expected_tokens = vec![
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(1.0)),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(23.123)),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(1.0)),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(542.0)),
+            },
+            Token {
+                token_type: TokenType::Number,
+                literal: Some(Literal::Numeric(2348923409.0)),
+            },
+        ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
 

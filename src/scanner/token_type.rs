@@ -25,7 +25,7 @@ pub enum TokenType {
     // Literals
     // Identifier,
     String,
-    // Number,
+    Number,
     // //Keywords
     // And,
     // Class,
