@@ -105,6 +105,13 @@ mod tests {
 
     use super::*;
 
+    fn make_test_token(tt: TokenType) -> Token {
+        Token {
+            token_type: tt,
+            literal: None,
+        }
+    }
+
     #[test]
     fn test_scan_tokens_all_success() {
         let tokens = match scan_tokens(String::from(
@@ -113,13 +120,6 @@ mod tests {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
-
-        fn make_test_token(tt: TokenType) -> Token {
-            Token {
-                token_type: tt,
-                literal: None,
-            }
-        }
 
         let expected_tokens = vec![
             make_test_token(TokenType::Bang),
@@ -172,13 +172,6 @@ mod tests {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
-
-        fn make_test_token(tt: TokenType) -> Token {
-            Token {
-                token_type: tt,
-                literal: None,
-            }
-        }
 
         let expected_tokens = vec![
             make_test_token(TokenType::Comment),
