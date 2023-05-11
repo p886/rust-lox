@@ -265,7 +265,7 @@ mod tests {
 
     #[test]
     fn test_scan_tokens_number_literals() {
-        let tokens = match scan_tokens(String::from("1.0 23.123 1 542 2348923409")) {
+        let tokens = match scan_tokens(String::from("1.0 23433434.1233456 1 542 2348923409")) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
@@ -277,7 +277,7 @@ mod tests {
             },
             Token {
                 token_type: TokenType::Number,
-                literal: Some(Literal::Numeric(23.123)),
+                literal: Some(Literal::Numeric(23433434.123456)),
             },
             Token {
                 token_type: TokenType::Number,
