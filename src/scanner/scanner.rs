@@ -64,40 +64,24 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                 })
             }
             '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
-                let mut elements: Vec<String> = Vec::new();
+                let mut num_parts: Vec<String> = Vec::new();
                 let mut contains_dot = false;
 
-                // add the first, matched character to the vector
-                elements.push(char.to_string());
-
-                // keep adding the rest of the numbers or (single) decimal dot until we run out
-                for next_char in chars.by_ref() {
-                    if next_char == '.' && contains_dot {
-                        break;
-                    }
-
-                    if next_char == '.' {
+                num_parts.push(char.to_string());
+                for c in chars.by_ref() {
+                    if c == '.' && !contains_dot {
                         contains_dot = true;
                     }
-
-                    if next_char != '.' && !(next_char.is_numeric()) {
+                    if c != '.' && (c.is_alphabetic() || c.is_whitespace()) {
                         break;
                     }
-                    elements.push(next_char.to_string());
+                    num_parts.push(c.to_string());
                 }
-                let joined = elements.join("");
-                let number = match joined.parse::<f64>() {
-                    Ok(num) => num,
-                    Err(err) => {
-                        return Err(format!(
-                            "Error parsing number: {}, trying to parse: {:?}",
-                            err, joined
-                        ))
-                    }
-                };
+
+                let lit = num_parts.join("").to_string().parse::<f64>().unwrap();
                 Ok(Token {
                     token_type: TokenType::Number,
-                    literal: Some(Literal::Numeric(number)),
+                    literal: Some(Literal::Numeric(lit)),
                 })
             }
             _ => Err(format!("unrecognized character {:?}", char)),
