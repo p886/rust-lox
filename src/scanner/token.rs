@@ -10,8 +10,9 @@ pub struct Token {
     // pub line: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Literal {
     String(String),
     Numeric(f64),
+    Identifier(String),
 }

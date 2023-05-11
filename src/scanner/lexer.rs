@@ -84,6 +84,49 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                     literal: Some(Literal::Numeric(lit)),
                 })
             }
+            'A'..='Z' | 'a'..='z' | '_' => {
+                let mut parts: Vec<String> = Vec::new();
+
+                parts.push(char.to_string());
+
+                for c in chars.by_ref() {
+                    if !(c.is_alphabetic()) && c != '_' {
+                        break;
+                    }
+                    parts.push(c.to_string());
+                }
+                let raw_token = parts.join("");
+
+                let typ = match raw_token.as_str() {
+                    "and" => TokenType::And,
+                    "class" => TokenType::Class,
+                    "else" => TokenType::Else,
+                    "fun" => TokenType::Fun,
+                    "for" => TokenType::For,
+                    "if" => TokenType::If,
+                    "nil" => TokenType::Nil,
+                    "or" => TokenType::Or,
+                    "print" => TokenType::Print,
+                    "return" => TokenType::Return,
+                    "super" => TokenType::Super,
+                    "this" => TokenType::This,
+                    "true" => TokenType::True,
+                    "var" => TokenType::Var,
+                    "while" => TokenType::While,
+                    &_ => TokenType::Identifier,
+                };
+
+                let lit = if typ == TokenType::Identifier {
+                    Some(Literal::Identifier(raw_token))
+                } else {
+                    None
+                };
+
+                Ok(Token {
+                    token_type: typ,
+                    literal: lit,
+                })
+            }
             _ => Err(format!("unrecognized character {:?}", char)),
         };
 
@@ -297,6 +340,94 @@ mod tests {
 
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+        }
+    }
+
+    #[test]
+    fn test_scan_tokens_identifiers_keywords() {
+        let tokens = match scan_tokens(String::from(
+            "test and class else fun for if nil or print return super this true var while _my_variable_",
+        )) {
+            Ok(tokens) => tokens,
+            Err(err) => panic!("Unexpected error in test: {}", err),
+        };
+
+        let expected_tokens = vec![
+            Token {
+                token_type: TokenType::Identifier,
+                literal: Some(Literal::Identifier(String::from("test"))),
+            },
+            Token {
+                token_type: TokenType::And,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Class,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Else,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Fun,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::For,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::If,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Nil,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Or,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Print,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Return,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Super,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::This,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::True,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Var,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::While,
+                literal: None,
+            },
+            Token {
+                token_type: TokenType::Identifier,
+                literal: Some(Literal::Identifier(String::from("_my_variable_"))),
+            },
+        ];
+
+        assert_eq!(tokens.len(), expected_tokens.len());
+
+        for (i, _) in tokens.iter().enumerate() {
+            assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+            assert_eq!(tokens[i].literal, expected_tokens[i].literal);
         }
     }
 }
