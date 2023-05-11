@@ -1,4 +1,4 @@
-use crate::scanner::scanner::scan_tokens;
+use crate::scanner::lexer::scan_tokens;
 use std::env;
 use std::fs;
 use std::io;
