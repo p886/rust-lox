@@ -224,6 +224,7 @@ mod tests {
 
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+            assert_eq!(tokens[i].literal, expected_tokens[i].literal);
         }
     }
 
@@ -255,6 +256,7 @@ mod tests {
 
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+            assert_eq!(tokens[i].literal, expected_tokens[i].literal);
         }
     }
 
@@ -274,6 +276,7 @@ mod tests {
 
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+            assert_eq!(tokens[i].literal, expected_tokens[i].literal);
         }
     }
 
@@ -320,7 +323,7 @@ mod tests {
             },
             Token {
                 token_type: TokenType::Number,
-                literal: Some(Literal::Numeric(23433434.123456)),
+                literal: Some(Literal::Numeric(23433434.1233456)),
             },
             Token {
                 token_type: TokenType::Number,
@@ -340,6 +343,7 @@ mod tests {
 
         for (i, _) in tokens.iter().enumerate() {
             assert_eq!(tokens[i].token_type, expected_tokens[i].token_type);
+            assert_eq!(tokens[i].literal, expected_tokens[i].literal);
         }
     }
 
