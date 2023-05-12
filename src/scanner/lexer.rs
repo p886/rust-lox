@@ -78,7 +78,11 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                     num_parts.push(c.to_string());
                 }
 
-                let lit = num_parts.join("").to_string().parse::<f64>().unwrap();
+                let lit = match num_parts.join("").to_string().parse::<f64>() {
+                    Ok(lit) => lit,
+                    Err(err) => return Err(format!("Unable to parse float: {}", err)),
+                };
+
                 Ok(Token {
                     token_type: TokenType::Number,
                     literal: Some(Literal::Numeric(lit)),
