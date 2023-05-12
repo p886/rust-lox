@@ -74,10 +74,3 @@ fn run(source: String) {
         println!("token: {:?}", tok);
     }
 }
-
-// fn error(line: i32, message: String) {
-//     report(line, String::from(""), message)
-// }
-// fn report(line: i32, whre: String, message: String) {
-//     println!("[line {}], Error: {}: {}", line, whre, message)
-// }
