@@ -1,6 +1,6 @@
 use std::vec;
 
-use crate::scanner::token::{Literal, Token};
+use crate::scanner::token::Token;
 use crate::scanner::token_type::TokenType;
 
 #[derive(Debug, PartialEq)]
@@ -189,6 +189,7 @@ impl Parser {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::scanner::token::Literal;
 
     #[test]
     fn test_build_tree() {
@@ -214,9 +215,9 @@ mod tests {
         let tokens: Vec<Token> = vec![one.clone(), plus.clone(), two.clone(), eof];
 
         let expected_tree = Expression::Binary {
-            left: Box::new(Expression::Literal(one.clone())),
-            operator: plus.clone(),
-            right: Box::new(Expression::Literal(two.clone())),
+            left: Box::new(Expression::Literal(one)),
+            operator: plus,
+            right: Box::new(Expression::Literal(two)),
         };
 
         let mut parser = Parser { current: 0, tokens };
