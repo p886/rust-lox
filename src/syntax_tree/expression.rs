@@ -171,9 +171,9 @@ impl Parser {
         self.peek().token_type == TokenType::Eof
     }
 
-    pub fn peek(&self) -> Token {
+    pub fn peek(&self) -> &Token {
         match self.tokens.get(self.current) {
-            Some(token) => token.clone(),
+            Some(token) => token,
             None => panic!("no token found!"),
         }
     }
