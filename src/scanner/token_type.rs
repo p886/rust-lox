@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
     // Single-character tokens.
     LeftParen,
@@ -40,7 +40,8 @@ pub enum TokenType {
     Super,
     This,
     True,
+    False,
     Var,
     While,
-    // Eof,
+    Eof,
 }

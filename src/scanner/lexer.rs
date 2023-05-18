@@ -115,6 +115,7 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
                     "super" => TokenType::Super,
                     "this" => TokenType::This,
                     "true" => TokenType::True,
+                    "false" => TokenType::False,
                     "var" => TokenType::Var,
                     "while" => TokenType::While,
                     &_ => TokenType::Identifier,
@@ -139,6 +140,11 @@ pub fn scan_tokens(source: String) -> Result<Vec<Token>, String> {
             Err(msg) => return Err(msg),
         }
     }
+    // add the trailing EOF token
+    tokens.push(Token {
+        token_type: TokenType::Eof,
+        literal: None,
+    });
     Ok(tokens)
 }
 
@@ -181,6 +187,11 @@ mod tests {
         }
     }
 
+    const EOF: Token = Token {
+        token_type: TokenType::Eof,
+        literal: None,
+    };
+
     #[test]
     fn test_scan_tokens_all_success() {
         let tokens = match scan_tokens(String::from(
@@ -222,6 +233,7 @@ mod tests {
                 token_type: TokenType::Number,
                 literal: Some(Literal::Numeric(6.78)),
             },
+            EOF,
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
@@ -254,6 +266,7 @@ mod tests {
         let expected_tokens = vec![
             make_test_token(TokenType::Comment),
             make_test_token(TokenType::Plus),
+            EOF,
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
@@ -271,10 +284,13 @@ mod tests {
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
 
-        let expected_tokens = vec![Token {
-            token_type: TokenType::String,
-            literal: Some(Literal::String(String::from("helloworld"))),
-        }];
+        let expected_tokens = vec![
+            Token {
+                token_type: TokenType::String,
+                literal: Some(Literal::String(String::from("helloworld"))),
+            },
+            EOF,
+        ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
 
@@ -301,10 +317,13 @@ mod tests {
             Err(err) => panic!("Unexpected error in test: {}", err),
         };
 
-        let expected_tokens = vec![Token {
-            token_type: TokenType::String,
-            literal: Some(Literal::String(String::from("hello\nworld"))),
-        }];
+        let expected_tokens = vec![
+            Token {
+                token_type: TokenType::String,
+                literal: Some(Literal::String(String::from("hello\nworld"))),
+            },
+            EOF,
+        ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
 
@@ -341,6 +360,7 @@ mod tests {
                 token_type: TokenType::Number,
                 literal: Some(Literal::Numeric(2348923409.0)),
             },
+            EOF,
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());
@@ -354,7 +374,7 @@ mod tests {
     #[test]
     fn test_scan_tokens_identifiers_keywords() {
         let tokens = match scan_tokens(String::from(
-            "test and class else fun for if nil or print return super this true var while _my_variable_",
+            "test and class else fun for if nil or print return super this true false var while _my_variable_",
         )) {
             Ok(tokens) => tokens,
             Err(err) => panic!("Unexpected error in test: {}", err),
@@ -418,6 +438,10 @@ mod tests {
                 literal: None,
             },
             Token {
+                token_type: TokenType::False,
+                literal: None,
+            },
+            Token {
                 token_type: TokenType::Var,
                 literal: None,
             },
@@ -429,6 +453,7 @@ mod tests {
                 token_type: TokenType::Identifier,
                 literal: Some(Literal::Identifier(String::from("_my_variable_"))),
             },
+            EOF,
         ];
 
         assert_eq!(tokens.len(), expected_tokens.len());

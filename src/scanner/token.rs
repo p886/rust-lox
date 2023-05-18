@@ -1,6 +1,6 @@
 use crate::scanner::token_type::TokenType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     // the enumerated type of token
     pub token_type: TokenType,
@@ -10,7 +10,7 @@ pub struct Token {
     // pub line: i32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Literal {
     String(String),
     Numeric(f64),

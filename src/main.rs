@@ -1,10 +1,12 @@
 use crate::scanner::lexer::scan_tokens;
+use crate::syntax_tree::expression::Parser;
 use std::env;
 use std::fs;
 use std::io;
 use std::io::Write;
 
 mod scanner;
+mod syntax_tree;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -73,4 +75,7 @@ fn run(source: String) {
     for tok in tokens.iter() {
         println!("token: {:?}", tok);
     }
+    let mut parser = Parser { current: 0, tokens };
+    let ast = parser.expression();
+    println!("AST -> {:#?}", ast)
 }
