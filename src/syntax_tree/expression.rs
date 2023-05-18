@@ -131,7 +131,7 @@ impl Parser {
             self.consume(TokenType::RightParen, "Expect ')' after expression.");
             Expression::Grouping(Box::new(expr))
         } else {
-            panic!("oh shit")
+            panic!("incomplete expression")
         }
     }
 
