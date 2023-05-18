@@ -28,7 +28,7 @@ impl Parser {
         self.equality()
     }
 
-    pub fn equality(&mut self) -> Expression {
+    fn equality(&mut self) -> Expression {
         let mut expr = self.comparsion();
         while self.is_matching(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
             let operator = self.previous();
@@ -42,7 +42,7 @@ impl Parser {
         expr
     }
 
-    pub fn comparsion(&mut self) -> Expression {
+    fn comparsion(&mut self) -> Expression {
         let mut expr = self.term();
         while self.is_matching(vec![
             TokenType::Greater,
@@ -61,7 +61,7 @@ impl Parser {
         expr
     }
 
-    pub fn term(&mut self) -> Expression {
+    fn term(&mut self) -> Expression {
         let mut expr = self.factor();
 
         while self.is_matching(vec![TokenType::Minus, TokenType::Plus]) {
@@ -76,7 +76,7 @@ impl Parser {
         expr
     }
 
-    pub fn factor(&mut self) -> Expression {
+    fn factor(&mut self) -> Expression {
         let mut expr = self.unary();
         while self.is_matching(vec![TokenType::Slash, TokenType::Star]) {
             let operator = self.previous();
@@ -90,7 +90,7 @@ impl Parser {
         expr
     }
 
-    pub fn unary(&mut self) -> Expression {
+    fn unary(&mut self) -> Expression {
         if self.is_matching(vec![TokenType::Bang, TokenType::Minus]) {
             let operator = self.previous();
             let right = self.unary();
@@ -102,7 +102,7 @@ impl Parser {
         self.primary()
     }
 
-    pub fn primary(&mut self) -> Expression {
+    fn primary(&mut self) -> Expression {
         if self.is_matching(vec![TokenType::False]) {
             return Expression::Literal(Token {
                 token_type: TokenType::False,
@@ -135,7 +135,7 @@ impl Parser {
         }
     }
 
-    pub fn consume(&mut self, tt: TokenType, msg: &str) {
+    fn consume(&mut self, tt: TokenType, msg: &str) {
         if self.check(tt) {
             self.advance();
             return;
@@ -143,7 +143,7 @@ impl Parser {
         panic!("{}", msg)
     }
 
-    pub fn is_matching(&mut self, t_types: Vec<TokenType>) -> bool {
+    fn is_matching(&mut self, t_types: Vec<TokenType>) -> bool {
         for tt in t_types {
             if self.check(tt) {
                 self.advance();
@@ -153,32 +153,32 @@ impl Parser {
         false
     }
 
-    pub fn check(&self, tt: TokenType) -> bool {
+    fn check(&self, tt: TokenType) -> bool {
         if self.is_at_end() {
             return false;
         }
         self.peek().token_type == tt
     }
 
-    pub fn advance(&mut self) -> Token {
+    fn advance(&mut self) -> Token {
         if !(self.is_at_end()) {
             self.current += 1;
         }
         self.previous()
     }
 
-    pub fn is_at_end(&self) -> bool {
+    fn is_at_end(&self) -> bool {
         self.peek().token_type == TokenType::Eof
     }
 
-    pub fn peek(&self) -> &Token {
+    fn peek(&self) -> &Token {
         match self.tokens.get(self.current) {
             Some(token) => token,
             None => panic!("no token found!"),
         }
     }
 
-    pub fn previous(&self) -> Token {
+    fn previous(&self) -> Token {
         match self.tokens.get(self.current - 1) {
             Some(token) => token.clone(),
             None => panic!("no token found!"),
