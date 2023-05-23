@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::scanner::token::{Literal, Token};
 use crate::scanner::token_type::TokenType;
 use crate::syntax_tree::expression::Expression;
@@ -26,10 +28,27 @@ pub fn interpret(tree: &Expression) -> Expression {
                     }
                     _ => interpret(&expr),
                 },
-                TokenType::Bang => Expression::Literal(Token {
-                    token_type: TokenType::Bang,
-                    literal: None,
-                }),
+                TokenType::Bang => match expr {
+                    Expression::Literal(tok) => match tok.token_type {
+                        TokenType::True => {
+                            return Expression::Literal(Token {
+                                token_type: TokenType::False,
+                                literal: None,
+                            })
+                        }
+                        TokenType::False => {
+                            return Expression::Literal(Token {
+                                token_type: TokenType::True,
+                                literal: None,
+                            })
+                        }
+                        _ => {
+                            let msg = format!("Cannot use `!` on token {:?}", tok.token_type);
+                            panic!("{}", msg)
+                        }
+                    },
+                    _ => interpret(&expr),
+                },
                 _ => Expression::Literal(Token {
                     token_type: TokenType::Bang,
                     literal: None,
@@ -38,9 +57,9 @@ pub fn interpret(tree: &Expression) -> Expression {
             expr
         }
         Expression::Binary {
-            left,
-            operator,
-            right,
+            left: _,
+            operator: _,
+            right: _,
         } => todo!(),
         Expression::Literal(lit) => Expression::Literal(lit.clone()),
         Expression::Grouping(group) => interpret(&*group),
