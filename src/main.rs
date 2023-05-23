@@ -1,3 +1,4 @@
+use crate::evaluation::interpreter;
 use crate::scanner::lexer::scan_tokens;
 use crate::syntax_tree::expression::Parser;
 use std::env;
@@ -5,6 +6,7 @@ use std::fs;
 use std::io;
 use std::io::Write;
 
+mod evaluation;
 mod scanner;
 mod syntax_tree;
 
@@ -77,5 +79,7 @@ fn run(source: String) {
     }
     let mut parser = Parser { current: 0, tokens };
     let ast = parser.expression();
-    println!("AST -> {:#?}", ast)
+    println!("AST -> {:#?}", ast);
+    let evaluated = interpreter::interpret(&ast);
+    println!("Evaluation: {:?}", evaluated)
 }
